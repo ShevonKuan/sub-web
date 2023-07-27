@@ -83,7 +83,7 @@ server {
             location = /50x.html {
         }
         
-        location /sub {
+        location ~ ^/(version|sub) {
                     add_header Access-Control-Allow-Origin $http_origin;
                     add_header Access-Control-Allow-Headers *;
                     add_header Access-Control-Allow-Methods *;
