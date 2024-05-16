@@ -46,20 +46,15 @@ steps:
       CGO_ENABLED: 0
       GOOS: linux
       GIN_MODE: release
-  - name: scp file
-    image: appleboy/drone-scp
+  - name: upload_debug
+    image: vividboarder/drone-webdav
     settings:
-      host:
-        - 47.243.44.66
-      username:
-        from_secret: ssh_username
-      key:
-        from_secret: ssh_key
-      port: 22
-      source:
-        - app
-      target:
-        - /var/www/sub-web/app
+    file: app
+    destination: http://172.17.0.1:5244/dav/DIST/
+    username: 
+      from_secret: webdav_username
+    password: 
+      from_secret: webdav_password
   - name: deploy
     image: appleboy/drone-ssh
     settings:
