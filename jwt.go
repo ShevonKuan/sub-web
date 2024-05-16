@@ -21,16 +21,21 @@ var jwtConfig = &JWTConfig{
 	ExpiresAt:  24 * time.Hour,
 }
 
+type User struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 func Login(c *gin.Context) {
 	// 获取用户名和密码
-	username := c.PostForm("username")
-	password := c.PostForm("password")
+	user := User{}
+	c.ShouldBind(&user)
 	// 验证用户名和密码
 	m := md5.New()
-	m.Write([]byte(username + "qqzl" + password))
+	m.Write([]byte(user.Username + "qqzl" + user.Password))
 	hm := hex.EncodeToString(m.Sum(nil))
 	fmt.Println(hm)
-	if hm != "bcfc3329cc0847c9c8289cb7ce9ab824" {
+	if hm != "4daee5dbdef086044000810df390b71c" {
 		c.JSON(http.StatusOK, gin.H{
 			"token": "",
 			"code":  "0",
@@ -39,7 +44,7 @@ func Login(c *gin.Context) {
 
 		token := jwt.New(jwt.SigningMethodHS256)
 		claims := token.Claims.(jwt.MapClaims)
-		claims["username"] = username
+		claims["username"] = user.Username
 		claims["exp"] = time.Now().Add(jwtConfig.ExpiresAt).Unix()
 		tokenString, _ := token.SignedString(jwtConfig.SigningKey)
 		c.JSON(http.StatusOK, gin.H{

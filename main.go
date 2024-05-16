@@ -26,6 +26,7 @@ func main() {
 	// 需鉴权的路由组
 	r.GET("/api/form", authMiddleware(), GetForm)
 	r.POST("/api/form", authMiddleware(), PostForm)
+	r.PUT("/api/form", authMiddleware(), AddForm)
 	r.GET("/s", GetSub)
 	r.Run(":8080")
 }

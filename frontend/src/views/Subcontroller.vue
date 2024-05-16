@@ -5,12 +5,40 @@
                 <el-card shadow="always" style="max-width: 48rem;margin:0 auto">
                     <div slot="header">
                         Shevon 订阅统一控制面板
-                        <svg-icon icon-class="github" style="margin-left: 20px" @click="goToProject" />
-
+                        <svg-icon icon-class="github" style="margin-left: 20px;margin-right: 20px"
+                            @click="goToProject" />
                         <div style="display: inline-block; position:absolute; right: 20px">{{ backendVersion }}</div>
+
                     </div>
                     <el-container>
                         <el-form :model="form" label-width="80px" label-position="left" style="width: 100%">
+
+                            <el-form-item label="配置文件:">
+                                <el-select v-model="config" placeholder="">
+                                    <el-option v-for="item in configFile" :key="item.uuid" :label="item.name"
+                                        :value="item.uuid">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="新建配置:">
+                                <el-input v-model="configName" placeholder="配置名称 将会自动保存目前在编辑的所有配置" width="50%" />
+
+                            </el-form-item>
+                            <el-form-item label-width="0px" style="text-align: center">
+                                <el-button @click="addConfig" plain type="primary" style="width: 20%;"
+                                    :disabled="configName.length === 0">新建配置</el-button>
+                                <el-button plain style="width: 20%" type="success"
+                                    @click="getConfig">重新读取所有配置</el-button>
+                                <el-button plain style="width: 20%" type="success"
+                                    @click="saveConfig">保存所有配置</el-button>
+                                <el-button plain style="width: 20%" type="danger"
+                                    @click="deleteConfig">删除当前配置</el-button>
+
+
+
+                            </el-form-item>
+
+                            <el-divider content-position="center" />
                             <el-form-item label="模式设置:">
                                 <el-radio v-model="advanced" label="1">基础模式</el-radio>
                                 <el-radio v-model="advanced" label="2">进阶模式</el-radio>
@@ -38,8 +66,8 @@
                                         style="width: 100%">
                                         <el-option-group v-for="group in options.remoteConfig" :key="group.label"
                                             :label="group.label">
-                                            <el-option v-for="item in group.options" :key="item.value" :label="item.label"
-                                                :value="item.value"></el-option>
+                                            <el-option v-for="item in group.options" :key="item.value"
+                                                :label="item.label" :value="item.value"></el-option>
                                         </el-option-group>
 
                                     </el-select>
@@ -62,7 +90,8 @@
                                 <el-form-item label-width="0px">
                                     <el-row type="flex">
                                         <el-col>
-                                            <el-checkbox v-model="form.nodeList" label="输出为 Node List" border></el-checkbox>
+                                            <el-checkbox v-model="form.nodeList" label="输出为 Node List"
+                                                border></el-checkbox>
                                         </el-col>
                                         <el-popover placement="bottom" v-model="form.extraset">
                                             <el-row>
@@ -89,10 +118,12 @@
                                         </el-popover>
                                         <el-popover placement="bottom" style="margin-left: 10px">
                                             <el-row>
-                                                <el-checkbox v-model="form.tpl.surge.doh" label="Surge.DoH"></el-checkbox>
+                                                <el-checkbox v-model="form.tpl.surge.doh"
+                                                    label="Surge.DoH"></el-checkbox>
                                             </el-row>
                                             <el-row>
-                                                <el-checkbox v-model="form.tpl.clash.doh" label="Clash.DoH"></el-checkbox>
+                                                <el-checkbox v-model="form.tpl.clash.doh"
+                                                    label="Clash.DoH"></el-checkbox>
                                             </el-row>
                                             <el-row>
                                                 <el-checkbox v-model="form.insert" label="网易云"></el-checkbox>
@@ -110,43 +141,40 @@
 
                             <el-form-item label="订阅链接:">
                                 <el-input class="copy-content" disabled v-model="customSubUrl">
-                                    <el-button slot="append" v-clipboard:copy="customSubUrl" v-clipboard:success="onCopy"
-                                        ref="copy-btn" icon="el-icon-document-copy">复制</el-button>
+                                    <el-button slot="append" v-clipboard:copy="customSubUrl"
+                                        v-clipboard:success="onCopy" ref="copy-btn"
+                                        icon="el-icon-document-copy">复制</el-button>
                                 </el-input>
                             </el-form-item>
 
                             <el-form-item label="订阅短链:">
-                                    <el-input class="copy-content" disabled v-model="subUrlShort">
-                                        <el-button slot="append" v-clipboard:copy="subUrlShort" v-clipboard:success="onCopy"
-                                            ref="copy-btn" icon="el-icon-document-copy">复制</el-button>
-                                    </el-input>
-                                </el-form-item>
-
-
-                            <el-form-item label-width="0px" style="margin-top: 40px; text-align: center">
-                                <el-button plain style="width: 30%" type="danger" @click="getConfig"
-                                    >重新读取配置</el-button>
-                                    <el-button plain style="width: 30%" type="danger" @click="saveConfig"
-                                        >保存配置</el-button>
-                                <el-button plain style="width: 30%" type="primary" @click="dialogLoadConfigVisible = true"
-                                    icon="el-icon-copy-document" :loading="loading">从URL解析</el-button>
-
-
+                                <el-input class="copy-content" disabled v-model="subUrlShort">
+                                    <el-button slot="append" v-clipboard:copy="subUrlShort" v-clipboard:success="onCopy"
+                                        ref="copy-btn" icon="el-icon-document-copy">复制</el-button>
+                                </el-input>
                             </el-form-item>
+
+
+
 
                             <el-form-item label-width="0px" style="text-align: center">
 
                                 <el-button plain style="width: 30%" type="success" @click="clashInstall"
-                                    icon="el-icon-connection" :disabled="customSubUrl.length === 0">一键导入Clash</el-button>
+                                    icon="el-icon-connection"
+                                    :disabled="customSubUrl.length === 0">一键导入Clash</el-button>
                                 <el-button plain style="width: 30%" type="success" @click="surgeInstall"
-                                    icon="el-icon-connection" :disabled="customSubUrl.length === 0">一键导入Surge</el-button>
+                                    icon="el-icon-connection"
+                                    :disabled="customSubUrl.length === 0">一键导入Surge</el-button> <el-button plain
+                                    style="width: 30%" type="primary" @click="dialogLoadConfigVisible = true"
+                                    icon="el-icon-copy-document" :loading="loading">从URL解析</el-button>
                             </el-form-item>
 
                             <el-form-item label-width="0px" style="text-align: center">
                                 <el-button plain style="width: 30%" type="warning" @click="gotoGayhub"
                                     icon="el-icon-link">sheon的ACL4SSR仓库</el-button>
-                                <el-button plain style="width: 15%" type="info" @click="dialogUploadConfigVisible = true"
-                                    icon="el-icon-upload" :loading="loading">上传配置</el-button>
+                                <el-button plain style="width: 15%" type="info"
+                                    @click="dialogUploadConfigVisible = true" icon="el-icon-upload"
+                                    :loading="loading">上传配置</el-button>
                                 <el-button plain style="width: 15%" type="info" @click="gotoRemoteConfig"
                                     icon="el-icon-link">配置示例</el-button>
                                 <el-button plain style="width: 15%" type="danger" @click="gotoConverter"
@@ -175,7 +203,8 @@
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="uploadConfig = ''; dialogUploadConfigVisible = false">取 消</el-button>
-                <el-button type="primary" @click="confirmUploadConfig" :disabled="uploadConfig.length === 0">确 定</el-button>
+                <el-button type="primary" @click="confirmUploadConfig" :disabled="uploadConfig.length === 0">确
+                    定</el-button>
             </div>
         </el-dialog>
 
@@ -186,8 +215,8 @@
             </div>
             <el-form label-position="left">
                 <el-form-item prop="uploadConfig">
-                    <el-input v-model="loadConfig" type="textarea" :autosize="{ minRows: 15, maxRows: 15 }" maxlength="5000"
-                        show-word-limit></el-input>
+                    <el-input v-model="loadConfig" type="textarea" :autosize="{ minRows: 15, maxRows: 15 }"
+                        maxlength="5000" show-word-limit></el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -195,6 +224,7 @@
                 <el-button type="primary" @click="confirmLoadConfig" :disabled="loadConfig.length === 0">确 定</el-button>
             </div>
         </el-dialog>
+
 
     </div>
 </template>
@@ -523,30 +553,56 @@ export default {
             dialogUploadConfigVisible: false,
             loadConfig: "",
             dialogLoadConfigVisible: false,
+            dialogAddConfigVisible: false,
             uploadConfig: "",
             uploadPassword: "",
             myBot: tgBotLink,
             sampleConfig: remoteConfigSample,
 
             needUdp: true, // 是否需要添加 udp 参数
+
+            configFile: [],
+            config: "",
+            configs: {},
+            configName: ""
         };
     },
     created() {
         document.title = "shevon订阅转换";
         this.isPC = this.$getOS().isPc;
 
-        // 获取 url cache
-        if (process.env.VUE_APP_USE_STORAGE === 'true') {
-            this.form.sourceSubUrl = this.getLocalStorageItem('sourceSubUrl')
-        }
         this.getConfig();
     },
     mounted() {
         this.form.clientType = "clash";
-        this.notify();
+        // this.notify();
         this.getBackendVersion();
     },
     methods: {
+        addConfig() {
+            // data prepare
+            var name = this.configName
+            this.$axios.interceptors.request.use((config) => {
+                const token = this.getLocalStorageItem("token");
+                if (token) {
+                    config.headers.Authorization = `${token}`;
+                }
+                return config;
+            });
+            this.$axios
+                .put('/api/form', { name: name }) //querystring name
+                .then(res => {
+                    if (res.data.code == 1) {
+                        this.$message.success("成功添加配置");
+                    }
+                    this.getConfig()
+
+                })
+                .catch(res => {
+                    this.$message.error(res.data.message);
+                });
+
+        },
         onCopy() {
             this.$message.success("Copied!");
         },
@@ -562,7 +618,7 @@ export default {
         gotoConverter() {
             localStorage.removeItem('token')
             this.$router.push('/')
-            
+
         },
         clashInstall() {
             if (this.customSubUrl === "") {
@@ -581,6 +637,7 @@ export default {
             );
         },
         getConfig() {
+            var name = this.configName
             this.$axios.interceptors.request.use((config) => {
                 const token = this.getLocalStorageItem("token");
                 if (token) {
@@ -591,7 +648,35 @@ export default {
             this.$axios
                 .get('/api/form')
                 .then(res => {
-                    this.form = res.data;
+                    // 遍历res
+                    this.configFile = [];
+                    this.configs = {}
+                    this.configName = ""
+                    for (let key in res.data) {
+                        this.configFile.push({
+                            uuid: res.data[key]["uuid"],
+                            name: res.data[key]["name"]
+                        });
+                        this.configs[res.data[key]["uuid"]] = {
+                            name: res.data[key]["name"],
+                            config: res.data[key]["config"]
+                        }
+
+                    }
+                    if (name != "") {
+                        for (let key in this.configFile) {
+                            if (this.configFile[key]["name"] === name) {
+                                this.config = this.configFile[key].uuid
+                                break
+                            }
+
+                        }
+                    }
+                    else {
+                        this.config = this.configFile[0].uuid
+                    }
+
+
                     this.$message.success("成功获取配置");
                 })
                 .catch(res => {
@@ -599,6 +684,15 @@ export default {
                 });
         },
         saveConfig() {
+            // data prepare
+            var data = []
+            for (let key in this.configs) {
+                data.push({
+                    "uuid": key,
+                    "name": this.configs[key]["name"],
+                    "config": this.configs[key]["config"]
+                })
+            }
             this.$axios.interceptors.request.use((config) => {
                 const token = this.getLocalStorageItem("token");
                 if (token) {
@@ -607,18 +701,24 @@ export default {
                 return config;
             });
             this.$axios
-                .post('/api/form', this.form)
+                .post('/api/form', data)
                 .then(res => {
                     if (res.data.code == 1) {
-                    this.$message.success("成功保存配置");
-                   }
-                    
+                        this.$message.success("成功保存配置");
+                    }
+
                 })
                 .catch(res => {
                     this.$message.error(res.data.message);
                 });
         },
-        
+        deleteConfig() {
+            delete this.configs[this.config]
+            this.configFile = this.configFile.filter((item) => item.uuid !== this.config)
+            this.saveConfig()
+            this.config = this.configFile[0].uuid
+        },
+
 
         surgeInstall() {
             if (this.customSubUrl === "") {
@@ -700,7 +800,7 @@ export default {
                     this.customSubUrl += "&new_name=" + this.form.new_name.toString();
                 }
             }
-            this.subUrlShort = "https://sub.datagrids.dev/s?i="+this.form.subUrlShort
+            this.subUrlShort = "https://sub.datagrids.dev/s?i=" + this.form.subUrlShort
         },
         makeShortUrl() {
             if (this.customSubUrl === "") {
@@ -922,9 +1022,16 @@ export default {
             handler: function () {
                 this.makeUrl();
                 this.form.subUrl = this.customSubUrl;
+
             },
             deep: true
         },
+        config: {
+            handler: function () {
+                this.form = (this.configs[this.config]).config;
+            },
+            deep: true
+        }
     }
 };
 </script>

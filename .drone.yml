@@ -1,0 +1,75 @@
+kind: pipeline
+name: CI/CD # LimitRange for Pod or Container
+type: docker
+
+trigger:
+  event:
+    - push
+    - pull_request
+  branch:
+    - master
+
+steps:
+  - name: renovate
+    image: renovate/renovate:37-full
+    when:
+      event:
+        - cron
+        - custom
+    environment:
+      RENOVATE_PLATFORM: gitea
+      RENOVATE_ENDPOINT: https://git.datagrids.dev
+      RENOVATE_GIT_AUTHOR: "Renovate Bot <bot@renovateapp.com>"
+      RENOVATE_PR_HOURLY_LIMIT: 10
+      RENOVATE_TOKEN:
+        from_secret: gitea_token
+      GITHUB_COM_TOKEN:
+        from_secret: github_token
+      LOG_LEVEL: debug
+      RENOVATE_REPOSITORIES: ${DRONE_REPO}
+    commands:
+      - unset GIT_COMMITTER_NAME GIT_COMMITTER_EMAIL GIT_AUTHOR_NAME GIT_AUTHOR_EMAIL
+      - renovate
+  - name: build frontend
+    image: node:16.20-slim
+    commands:
+      - cd frontend
+      - yarn install
+      - yarn build
+  - name: build backend
+    image: golang:alpine3.19
+    commands:
+      - go mod tidy
+      - go mod download
+      - go build -v -o app -trimpath -ldflags "-s -w -buildid=" ./
+    environment:
+      CGO_ENABLED: 0
+      GOOS: linux
+      GIN_MODE: release
+  - name: scp file
+    image: appleboy/drone-scp
+    settings:
+      host:
+        - 47.243.44.66
+      username:
+        from_secret: ssh_username
+      key:
+        from_secret: ssh_key
+      port: 22
+      source:
+        - app
+      target:
+        - /var/www/sub-web/app
+  - name: deploy
+    image: appleboy/drone-ssh
+    settings:
+      host:
+        - 47.243.44.66
+      username:
+        from_secret: ssh_username
+      key:
+        from_secret: ssh_key
+      port: 22
+      script:
+        - chmod +x /var/www/sub-web/app
+        - systemctl restart sub-web

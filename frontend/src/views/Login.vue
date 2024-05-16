@@ -43,7 +43,7 @@ export default {
         login() {
             this.$axios
                 .post('/api/login', {
-                    user: this.form.user,
+                    username: this.form.user,
                     password: this.form.password,
                 })
                 .then(res => {
