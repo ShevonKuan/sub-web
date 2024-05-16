@@ -50,7 +50,7 @@ steps:
     image: vividboarder/drone-webdav
     settings:
       file: app
-      destination: http://172.17.0.1:5244/dav/DIST/
+      destination: http://172.18.0.1:5244/dav/DIST/
       username: 
         from_secret: webdav_username
       password: 
