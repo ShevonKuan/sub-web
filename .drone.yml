@@ -49,12 +49,12 @@ steps:
   - name: upload_debug
     image: vividboarder/drone-webdav
     settings:
-    file: app
-    destination: http://172.17.0.1:5244/dav/DIST/
-    username: 
-      from_secret: webdav_username
-    password: 
-      from_secret: webdav_password
+      file: app
+      destination: http://172.17.0.1:5244/dav/DIST/
+      username: 
+        from_secret: webdav_username
+      password: 
+        from_secret: webdav_password
   - name: deploy
     image: appleboy/drone-ssh
     settings:
