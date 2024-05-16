@@ -2,12 +2,12 @@ kind: pipeline
 name: CI/CD # LimitRange for Pod or Container
 type: docker
 
-trigger:
-  event:
-    - push
-    - pull_request
-  branch:
-    - master
+# trigger:
+#   event:
+#     - push
+#     - pull_request
+#   branch:
+#     - master
 
 steps:
   - name: renovate
