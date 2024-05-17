@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 
@@ -32,10 +33,10 @@ func Login(c *gin.Context) {
 	c.ShouldBind(&user)
 	// 验证用户名和密码
 	m := md5.New()
-	m.Write([]byte(user.Username + "qqzl" + user.Password))
+
+	io.WriteString(m, user.Username+"qqzl"+user.Password)
 	hm := hex.EncodeToString(m.Sum(nil))
-	fmt.Println(hm)
-	if hm != "4daee5dbdef086044000810df390b71c" {
+	if hm != "6eb0cc571ceb8be8e8785f51959c29aa" {
 		c.JSON(http.StatusOK, gin.H{
 			"token": "",
 			"code":  "0",
