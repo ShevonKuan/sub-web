@@ -85,7 +85,7 @@ func GetSub(c *gin.Context) {
 func callBHandler(c *gin.Context, bURL string) *http.Response {
 	// Create a new request with the same method and body as the original request
 	bReq, _ := http.NewRequest("GET", bURL, nil)
-	bReq.Header = c.Request.Header
+	// bReq.Header = c.Request.Header
 
 	// Send the request to the application and return the response
 	client := http.DefaultClient
