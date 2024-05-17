@@ -68,9 +68,14 @@ func Config() *ConfigFile {
 		newuuid := uuid.New().String()
 		config := ConfigFile{
 			ConfigData{
-				UUID:   newuuid,
-				Config: ConfigForm{},
-				Name:   "new config",
+				UUID: newuuid,
+				Config: ConfigForm{
+					Emoji:   true,
+					Udp:     true,
+					Scv:     true,
+					NewName: true,
+				},
+				Name: "new config",
 			},
 		} // Initialize default config values here
 

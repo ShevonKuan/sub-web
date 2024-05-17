@@ -48,9 +48,14 @@ func AddForm(c *gin.Context) {
 	newuuid := uuid.New().String()
 	*config = append(*config,
 		ConfigData{
-			UUID:   newuuid,
-			Name:   name.Name,
-			Config: ConfigForm{},
+			UUID: newuuid,
+			Name: name.Name,
+			Config: ConfigForm{
+				Emoji:   true,
+				Udp:     true,
+				Scv:     true,
+				NewName: true,
+			},
 		},
 	)
 	UpdateConfig(config)
