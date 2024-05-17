@@ -59,7 +59,7 @@ steps:
       source:
         - app
       target:
-        - /var/www/sub-web/app
+        - /var/www/sub-web/
   - name: deploy
     image: appleboy/drone-ssh
     settings:
